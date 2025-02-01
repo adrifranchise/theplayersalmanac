@@ -4,8 +4,9 @@ export default function Home() {
       <h1 className="text-4xl font-bold mb-4 text-neon-green">Welcome to The Player's Almanac</h1>
       <p className="text-lg max-w-xl text-center">
         Your ultimate hub for game tracking, reviews, stats, and discovery. Explore your gaming history, connect with fellow players, and track your progress like never before.
-Hello peev <3
-      </p>
+ </p>
+	<p className="text-center text-sm mt-4">Hello peev ❤️</p>
+
     </div>
   );
 }
