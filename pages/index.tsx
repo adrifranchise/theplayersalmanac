@@ -1,8 +1,12 @@
 export default function Home() {
   return (
-    <div>
-      <h1>Welcome to The Player's Almanac!</h1>
-      <p>Site is up and running 🚀</p>
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center">
+      <h1 className="text-4xl font-bold mb-4 text-neon-green">Welcome to The Player's Almanac</h1>
+      <p className="text-lg max-w-xl text-center">
+        Your ultimate hub for game tracking, reviews, stats, and discovery. Explore your gaming history, connect with fellow players, and track your progress like never before.
+Hello peev <3
+      </p>
     </div>
   );
 }
+
