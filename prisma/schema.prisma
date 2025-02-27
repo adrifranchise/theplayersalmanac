@@ -14,9 +14,147 @@ generator client {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
+  id              Int           @id @default(autoincrement())
+  email           String        @unique
+  name            String?
+  username        String?       @unique
+  password        String?       // Hashed password (consider using NextAuth instead)
+  avatar          String?       // URL to avatar image
+  bio             String?       // User biography
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  // Relations
+  ownedGames      UserGame[]    // Games owned by the user
+  reviews         Review[]      // Reviews written by the user
+  lists           GameList[]    // Custom game lists created by user
 }
 
+model Game {
+  id              Int           @id @default(autoincrement())
+  title           String        
+  slug            String        @unique // URL-friendly version of title
+  coverImage      String?       // URL to game cover image
+  releaseDate     DateTime?
+  developer       String?
+  publisher       String?
+  description     String?
+  platforms       Platform[]    // Platforms this game is available on
+  genres          Genre[]       // Genres this game belongs to
+  metacriticScore Int?          // Optional Metacritic score
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  // Relations
+  ownedBy         UserGame[]    // Users who own this game
+  reviews         Review[]      // Reviews for this game
+  inLists         GameListItem[] // Lists this game appears in
+}
+
+model UserGame {
+  id              Int           @id @default(autoincrement())
+  userId          Int
+  gameId          Int
+  playTime        Int           @default(0) // In minutes
+  completionPercentage Int      @default(0) // 0-100
+  playThroughCount Int          @default(0) // Number of times completed
+  status          GameStatus    @default(BACKLOG)
+  platform        Platform?     // The platform the user owns this game on
+  purchaseDate    DateTime?
+  lastPlayed      DateTime?
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  // Relations
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game            Game          @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId]) // Each user can only have a game once
+}
+
+model Review {
+  id              Int           @id @default(autoincrement())
+  userId          Int
+  gameId          Int
+  content         String        // The actual review text
+  starRating      Int?          // Optional 1-5 star rating
+  sentiment       Sentiment     @default(NEUTRAL) // Positive/Negative/Neutral
+  isRecommended   Boolean?      // Steam-like recommendation
+  hoursPlayed     Int?          // Hours played when review was written
+  tags            ReviewTag[]   // Custom tags applied to this review
+  helpfulCount    Int           @default(0) // Number of users who found this helpful
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  // Relations
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game            Game          @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+model GameList {
+  id              Int           @id @default(autoincrement())
+  userId          Int
+  name            String
+  description     String?
+  isPublic        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  // Relations
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           GameListItem[]
+}
+
+model GameListItem {
+  id              Int           @id @default(autoincrement())
+  listId          Int
+  gameId          Int
+  notes           String?
+  position        Int           @default(0) // For custom ordering
+  createdAt       DateTime      @default(now())
+  // Relations
+  list            GameList      @relation(fields: [listId], references: [id], onDelete: Cascade)
+  game            Game          @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, gameId]) // Each game can only be in a list once
+}
+
+model ReviewTag {
+  id              Int           @id @default(autoincrement())
+  name            String        @unique
+  reviews         Review[]
+}
+
+model Genre {
+  id              Int           @id @default(autoincrement())
+  name            String        @unique
+  games           Game[]
+}
+
+// Enum Definitions
+enum Platform {
+  PC
+  PLAYSTATION_5
+  PLAYSTATION_4
+  PLAYSTATION_3
+  XBOX_SERIES_X
+  XBOX_ONE
+  XBOX_360
+  NINTENDO_SWITCH
+  NINTENDO_WII_U
+  NINTENDO_3DS
+  MOBILE_ANDROID
+  MOBILE_IOS
+  OTHER
+}
+
+enum GameStatus {
+  BACKLOG      // Not started
+  IN_PROGRESS  // Currently playing
+  COMPLETED    // Finished main story
+  ABANDONED    // Stopped playing with no plans to return
+  MASTERED     // 100% completed
+  WISHLIST     // Want to buy
+}
+
+enum Sentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+}
