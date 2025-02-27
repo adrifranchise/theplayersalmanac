@@ -1,4 +1,4 @@
-import GameCard from '../../components/gamecard';
+import GameCard from '../components/GameCard';
 
 // Mock data for games
 const games = [
